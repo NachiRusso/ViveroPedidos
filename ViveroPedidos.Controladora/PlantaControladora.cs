@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ViveroPedidos.Modelo.Datos;
 using ViveroPedidos.Modelo.Entidades;
+using ViveroPedidos.Modelo.Entidades;
 
 namespace ViveroPedidos.Controladora
 {
@@ -13,15 +14,34 @@ namespace ViveroPedidos.Controladora
     {
         private readonly PlantaDatos _datos = new PlantaDatos();
 
-        List<Planta> ListarDisponibles() 
+        // MÉTODO FALTANTE Y PUBLIC
+        public List<Planta> Listar(string? filtro = null)
         {
-          return _datos.ListarTodas()
-                         .Where(p => p.Disponible)
-                         .OrderBy(p => p.NombreComun)
-                         .ToList();
+            var plantas = _datos.ListarTodas();
+
+            if (!string.IsNullOrWhiteSpace(filtro))
+            {
+                filtro = filtro.ToLower();
+                plantas = plantas.Where(p =>
+                    p.Codigo.ToLower().Contains(filtro) ||
+                    p.NombreComun.ToLower().Contains(filtro) ||
+                    p.Especie.ToLower().Contains(filtro)).ToList();
+            }
+
+            return plantas;
         }
-       
-        void GuardarNuevo(string codigo, string nombreComun, string especie) 
+
+        // AGREGADO PUBLIC
+        public List<Planta> ListarDisponibles()
+        {
+            return _datos.ListarTodas()
+                           .Where(p => p.Disponible)
+                           .OrderBy(p => p.NombreComun)
+                           .ToList();
+        }
+
+        // AGREGADO PUBLIC
+        public void GuardarNuevo(string codigo, string nombreComun, string especie)
         {
             //ValidarDatosPlanta(codigo, nombreComun, especie);
 
@@ -33,18 +53,18 @@ namespace ViveroPedidos.Controladora
                 Codigo = codigo.Trim(),
                 NombreComun = nombreComun.Trim(),
                 Especie = especie.Trim(),
-                Disponible = true 
+                Disponible = true
             };
 
             _datos.Agregar(nuevaPlanta);
         }
-        
-        
-        void Modificar(int id, string codigo, string nombreComun, string especie, bool disponible) 
+
+        // AGREGADO PUBLIC
+        public void Modificar(int id, string codigo, string nombreComun, string especie, bool disponible)
         {
             var planta = _datos.ObtenerPorId(id) ?? throw new InvalidOperationException("La planta no existe.");
 
-           // ValidarDatosPlanta(codigo, nombreComun, especie);
+            //ValidarDatosPlanta(codigo, nombreComun, especie);
 
             if (_datos.ExisteCodigo(codigo.Trim(), id))
                 throw new InvalidOperationException("El código ingresado ya pertenece a otra planta.");
@@ -57,7 +77,8 @@ namespace ViveroPedidos.Controladora
             _datos.Modificar(planta);
         }
 
-        void MarcarNoDisponible(int id) 
+        // AGREGADO PUBLIC
+        public void MarcarNoDisponible(int id)
         {
             var planta = _datos.ObtenerPorId(id) ?? throw new InvalidOperationException("La planta no existe.");
 
@@ -67,9 +88,9 @@ namespace ViveroPedidos.Controladora
             planta.Disponible = false;
             _datos.Modificar(planta);
         }
-        
-        
-        void Eliminar(int id) 
+
+        // AGREGADO PUBLIC
+        public void Eliminar(int id)
         {
             if (_datos.ObtenerPorId(id) == null)
                 throw new InvalidOperationException("La planta no existe.");
